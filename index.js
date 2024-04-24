@@ -2,12 +2,13 @@ const TelegramBot = require('node-telegram-bot-api');
 
 const token = "1703589564:AAHIv2RJkyrB0W_d-LE6819wMOuq8WpUuCs";
 
+const adminID = 1077073109;
 const bot = new TelegramBot(token, { polling: true });
 
 const obj = {};
 
 const gameOptions = {
-    reply_markup:{
+    reply_markup: {
         inline_keyboard: [
             [
                 {
@@ -53,7 +54,7 @@ const gameOptions = {
             ],
             [
                 {
-                    text:'0',
+                    text: '0',
                     callback_data: "0"
                 }
             ]
@@ -114,6 +115,24 @@ const bootstrap = () => {
         }
 
         bot.sendMessage(chatId, 'Uzur men siz tushunmayabman!');
+    });
+    bot.on('callback_query', async msg => {
+        const data = msg.data;
+        const chatId = msg.message.chat.id;
+        const userId = msg.from.id; // Get the ID of the user who guessed the number
+
+        if (data == obj[chatId]) {
+            const userMessage = `Siz to'g'ri son topdingiz!. Kompyuter o'ylagan son ${obj[chatId]} edi .`;
+            const adminMessage = `Foydalanuvchi @${msg.from.username} to'g'ri son topdi: ${obj[chatId]}`;
+
+            // Send messages to both user and admin
+            await Promise.all([
+                bot.sendMessage(chatId, userMessage),
+                bot.sendMessage(adminID, adminMessage)
+            ]);
+        } else {
+            bot.sendMessage(chatId, `Siz tanagan son ${data} ${obj[chatId]}`);
+        }
     });
 };
 bootstrap();
